@@ -1,9 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator
+
 
 class UserProfile(models.Model):
-    profile_img = models.ImageField(upload_to = "profile/")
+    number = models.PositiveIntegerField(validators = [MaxValueValidator(999999999)], null = True)
     address = models.CharField(max_length=100)
+    income_month = models.PositiveIntegerField()
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 
