@@ -14,6 +14,7 @@ def get_user(request):
 @csrf_exempt
 def create_user(request):
     if request.method == "POST":
+        try:
             data = json.loads(request.body)
             username = data["username"]
             email = data["email"]
@@ -24,8 +25,10 @@ def create_user(request):
             if user:
                 return JsonResponse({"error": "Email already exists"})
             user1 = User.objects.create(username = username, email = email, password = make_password(password))
-            return JsonResponse({"message": "User created successfully", "data": data}, status = 200)
-    return JsonResponse({"message": "Error occured"}, status = 500)
+            return JsonResponse({"message": "User created successfully", "data": data})
+        except:
+            return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
 
 
 def get_user_by_id(request, id):
@@ -49,29 +52,32 @@ def delete_user(request, id):
             return JsonResponse({"message": "User successfully deleted", "data": json_data})
         else:
             return JsonResponse({"message": "User doesn't exist"})
-    return JsonResponse({"message": "Error occured"})
+    return JsonResponse({"message": "Invalid request method"})
     
 @csrf_exempt
 def update_user(request, id):
     if request.method == "PUT":
         user = User.objects.filter(id = id).first()
         if user:
-            data = json.loads(request.body)
-            user1 = User.objects.exclude(id=user.id).filter(email=data["email"]).first()
-            if user1:
-                return JsonResponse({"message": "User already exist with give email"})
-            user.username = data["username"]
-            user.email = data["email"]
-            user.password = make_password(data["password"])
-            user.save()
-            json_data = {
-                "name": user.username,
-                "email": user.email,
-                "password": user.password
-            }
-            return JsonResponse({"message": "User data successfully updated","data": json_data})
+            try:
+                data = json.loads(request.body)
+                user1 = User.objects.exclude(id=user.id).filter(email=data["email"]).first()
+                if user1:
+                    return JsonResponse({"message": "User already exist with give email"})
+                user.username = data["username"]
+                user.email = data["email"]
+                user.password = make_password(data["password"])
+                user.save()
+                json_data = {
+                    "name": user.username,
+                    "email": user.email,
+                    "password": user.password
+                }
+                return JsonResponse({"message": "User data successfully updated","data": json_data})
+            except:
+                return JsonResponse({"message": "Error occurred"})
         return JsonResponse({"message": "User doesn't exist"})
-    return JsonResponse({"message": "Error occured"})
+    return JsonResponse({"message": "Invalid request method"})
 
 
     
@@ -80,16 +86,19 @@ def create_user_profile(request, id):
     if request.method == "POST":
         user = User.objects.filter(id = id).first()
         if user:
-            data = json.loads(request.body)
-            number = data["number"]
-            address = data["address"]
-            income_month = data["income_month"]
-            if number == "" or address == "" or income_month == "":
-                return JsonResponse({"message": "Fields cannot be empty"})
-            userprofile = UserProfile.objects.create(number= number, address= address, income_month = income_month, user= user)
-            return JsonResponse({"message": "user profile created"})
+            try:
+                data = json.loads(request.body)
+                number = data["number"]
+                address = data["address"]
+                income_month = data["income_month"]
+                if number == "" or address == "" or income_month == "":
+                    return JsonResponse({"message": "Fields cannot be empty"})
+                userprofile = UserProfile.objects.create(number= number, address= address, income_month = income_month, user= user)
+                return JsonResponse({"message": "user profile created"})
+            except:
+                return JsonResponse({"message": "Error occurred"})
         return JsonResponse({"message": "User doesn;t exist"})
-    return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
 
 
 @csrf_exempt
@@ -98,13 +107,16 @@ def update_profile(request, id):
         user = User.objects.filter(id  = id).first()
         if user:
             profile = UserProfile.objects.filter(user= user).first()
-            data = json.loads(request.body)
-            if profile:
-                profile.number = data["number"]
-                profile.address = data["address"]
-                profile.income_month = data["income_month"]
-                profile.save()
-                return JsonResponse({"message": "SUccessfully updated"})
-            return JsonResponse({"message":"Profile doesn't exists"})
+            try:
+                data = json.loads(request.body)
+                if profile:
+                    profile.number = data["number"]
+                    profile.address = data["address"]
+                    profile.income_month = data["income_month"]
+                    profile.save()
+                    return JsonResponse({"message": "SUccessfully updated"})
+                return JsonResponse({"message":"Profile doesn't exists"})
+            except:
+                return JsonResponse({"message": "Error occurred"})
         return JsonResponse({"message":"User doesn't exists"})
-    return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
