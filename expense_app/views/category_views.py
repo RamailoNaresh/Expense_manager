@@ -8,14 +8,17 @@ from django.http import JsonResponse
 @csrf_exempt
 def create_category(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        name = data["name"]
-        category = Category.objects.filter(name = name).first()
-        if category:
-            return JsonResponse({"message": "category already exists"})
-        cat_obj = Category.objects.create(name = name.capitalize())
-        return JsonResponse({"message": "Category successfully created", "data": name})
-    return JsonResponse({"message": "Error occurred"})
+        try:
+            data = json.loads(request.body)
+            name = data["name"]
+            category = Category.objects.filter(name = name).first()
+            if category:
+                return JsonResponse({"message": "category already exists"})
+            cat_obj = Category.objects.create(name = name.capitalize())
+            return JsonResponse({"message": "Category successfully created", "data": name})
+        except:
+            return JsonResponse({"message":"Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
 
 
 def get_categories(request):
@@ -37,20 +40,23 @@ def delete_category(request, id):
             cat.delete()
             return JsonResponse({"message": "Data successfully deleted"})
         return JsonResponse({"message": "category doesn't exist"})
-    return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
 
 @csrf_exempt
 def update_category(request, id):
     if request.method == "PUT":
         cat = Category.objects.filter(id = id).first()
         if cat:
-            data = json.loads(request.body)
-            name = data["name"]
-            cat_obj = Category.objects.filter(name = name.capitalize()).first()
-            if cat_obj:
-                return JsonResponse({"message": "category already exist"})
-            cat.name = name.capitalize()
-            cat.save()
-            return JsonResponse({"message": "Category updated", "data": name})
+            try:
+                data = json.loads(request.body)
+                name = data["name"]
+                cat_obj = Category.objects.filter(name = name.capitalize()).first()
+                if cat_obj:
+                    return JsonResponse({"message": "category already exist"})
+                cat.name = name.capitalize()
+                cat.save()
+                return JsonResponse({"message": "Category updated", "data": name})
+            except:
+                return JsonResponse({"message": "Error occurred"})
         return JsonResponse({"message": "Category doesn't exist"})
-    return JsonResponse({"message": "Error Occurred"})
+    return JsonResponse({"message": "Invalid request method"})

@@ -7,21 +7,24 @@ from django.http import JsonResponse
 @csrf_exempt
 def create_expense(request, user_id, cat_id):
     if request.method == "POST":
-        data = json.loads(request.body)
-        expenses = data["expenses"]
-        expense_date = data["expense_date"]
-        note = data["note"]
-        cat = Category.objects.filter(id = cat_id).first()
-        user = User.objects.filter(id = user_id).first()
-        if cat:
-            if user:
-                if expenses == "" or expense_date == "":
-                    return JsonResponse({"message": "Expenses and expense_date is required"})
-                expense = Expense.objects.create(expenses= expenses, expense_date=expense_date, note = note, user = user, category=cat)
-                return JsonResponse({"message": "Expense added"})
-            return JsonResponse({"message": "User doesn't exist"})
-        return JsonResponse({"message": "category doesn't exist"})
-    return JsonResponse({"message": "Error occurred"})
+        try:
+            data = json.loads(request.body)
+            expenses = data["expenses"]
+            expense_date = data["expense_date"]
+            note = data["note"]
+            cat = Category.objects.filter(id = cat_id).first()
+            user = User.objects.filter(id = user_id).first()
+            if cat:
+                if user:
+                    if expenses == "" or expense_date == "":
+                        return JsonResponse({"message": "Expenses and expense_date is required"})
+                    expense = Expense.objects.create(expenses= expenses, expense_date=expense_date, note = note, user = user, category=cat)
+                    return JsonResponse({"message": "Expense added"})
+                return JsonResponse({"message": "User doesn't exist"})
+            return JsonResponse({"message": "category doesn't exist"})
+        except:
+            return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
 
 def get_expenses(request, user_id):
     user = User.objects.filter(id = user_id).first()
@@ -46,7 +49,7 @@ def delete_expense(request, id):
             expense.delete()
             return JsonResponse({"message": "Data successfully deleted"})
         return JsonResponse({"message": "data doesn't exists"})
-    return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
 
 
 @csrf_exempt
@@ -54,13 +57,16 @@ def update_expense(request, id):
     if request.method == "PUT":
         expense = Expense.objects.filter(id = id).first()
         if expense:
-            data = json.loads(request.body)
-            expense.expenses = data["expenses"]
-            expense.expense_date = data["expense_date"]
-            expense.note = data["note"]
-            expense.save()
-            return JsonResponse({"message": "Successfully updated"})
+            try:
+                data = json.loads(request.body)
+                expense.expenses = data["expenses"]
+                expense.expense_date = data["expense_date"]
+                expense.note = data["note"]
+                expense.save()
+                return JsonResponse({"message": "Successfully updated"})
+            except:
+                return JsonResponse({"message": "Error occurred"})
         return JsonResponse({"message": "Data doesn't exist"})
-    return JsonResponse({"message": "Error occurred"})
+    return JsonResponse({"message": "Invalid request method"})
             
         
